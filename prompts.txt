@@ -25,6 +25,8 @@ more prompts
 	The user then selects one GPX file from the dropdown, and then clicks start button.
 	The app then reads that GPX file and uses those locations as fake GPS at configured intervals
 
+*   Do not give me powershell commands to run.  Only give me windows CMD commands to run
+*   In Developer options, when I want to set my app as Mock LocationApp, my app is not available in the list
 
 
 
