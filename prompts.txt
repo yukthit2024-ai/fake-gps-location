@@ -1,0 +1,248 @@
+create an android application which is basically a fake GPS generator
+The app name is "Fake GPS Location Generator"
+On application start It should read a GPX file from the file system and load to memory
+It should then set the device GPS co-ordinates the values read from the GPX file.
+the GPS values should be separated by a time duration like .. every 5 seconds, or 10 seconds.
+This time duration is configurable from the settings page.
+Also have two button on the screen, which is used to Start and Stop the fake GPS generation.
+
+develop the app in java (not kotlin)
+Need a left side menu with items like "Settings", "Help", "About".
+for Help and About place a screen with some dummy data
+The left side menu is covering from top to bottom.  Even when menu is visible, it should not cover the app top bar and so on....
+store the timestamp as ISO format instead of milliseconds since epoc
+use latest gradle version supported by github actions
+include gradle properties and gradle wrapper dependencies in the project
+
+Give me as a single prompt to give to an agent to achieve this
+
+
+
+
+
+
+
+
+
+
+Here’s a clean, single prompt you can give to an AI coding agent. It incorporates your new **Start/Stop controls** and keeps everything tightly specified so the agent won’t guess or cut corners.
+
+---
+
+## **PROMPT FOR AGENT**
+
+Build a complete Android application in **Java (not Kotlin)** with the following specifications.
+
+---
+
+## **App Overview**
+
+* App name: **"Fake GPS Location Generator"**
+* The app simulates GPS movement using coordinates read from a GPX file.
+* On application startup:
+
+  * Read a **GPX file from device file system**
+  * Parse and load all track points into memory
+  * Do NOT start simulation automatically — wait for user to press **Start**
+
+---
+
+## **Core Features**
+
+### 1. GPX File Handling
+
+* Read `.gpx` file from device storage (use Storage Access Framework or scoped storage compliant approach)
+* Parse:
+
+  * Latitude
+  * Longitude
+  * Timestamp
+* Store timestamp strictly in **ISO 8601 format** (e.g., `yyyy-MM-dd'T'HH:mm:ss'Z'`)
+* Store parsed data in a list (e.g., `List<LocationPoint>`)
+
+---
+
+### 2. Fake GPS Simulation
+
+* Use Android mock location APIs (`LocationManager` with mock provider)
+* Sequentially feed coordinates from GPX list
+* Respect configurable delay between updates
+* Loop or stop when list ends (choose one and document behavior)
+
+---
+
+### 3. Start / Stop Controls
+
+* Main screen must include:
+
+  * **Start button**
+  * **Stop button**
+* Behavior:
+
+  * Start:
+
+    * Begins mock GPS updates
+    * Starts foreground service
+  * Stop:
+
+    * Stops updates immediately
+    * Stops foreground service
+* Prevent duplicate starts (handle state properly)
+
+---
+
+### 4. Update Interval Configuration
+
+* Default interval: **5 seconds**
+* Configurable in **Settings screen**
+* Options: 5, 10, 15 seconds (or editable numeric input)
+* Persist using **SharedPreferences**
+
+---
+
+### 5. Background Execution
+
+* Implement simulation using a **Foreground Service**
+* Show persistent notification:
+
+  * "Fake GPS Running"
+* Ensure updates continue when app is in background
+
+---
+
+### 6. Permissions
+
+Handle runtime permissions:
+
+* `ACCESS_FINE_LOCATION`
+* Mock location (developer option required)
+* Storage/file access (scoped storage compliant)
+
+Gracefully handle denied permissions.
+
+---
+
+## **User Interface**
+
+### Main Screen
+
+Display:
+
+* Current latitude
+* Current longitude
+* Current timestamp (ISO format)
+* Status: Running / Stopped
+
+Buttons:
+
+* Start
+* Stop
+
+---
+
+### Navigation Drawer (Left Side Menu)
+
+* Use `DrawerLayout` + `NavigationView`
+* Drawer must:
+
+  * Cover full height (top to bottom)
+  * NOT overlap the app top bar (AppBar remains visible)
+* Menu items:
+
+  * Settings
+  * Help
+  * About
+
+---
+
+### Settings Screen
+
+* Configure update interval
+* Save using SharedPreferences
+
+---
+
+### Help Screen
+
+* Static dummy content explaining usage
+
+---
+
+### About Screen
+
+* Static dummy content (app name, version, description)
+
+---
+
+## **Architecture & Code Structure**
+
+* Use **Java + AndroidX**
+* Clean modular design:
+
+  * Activities / Fragments
+  * Separate classes:
+
+    * `GpxParser`
+    * `LocationPoint` model
+    * `MockLocationService`
+* Use proper lifecycle handling
+
+---
+
+## **Technical Details**
+
+* Use `LocationManager` mock provider
+* Use `Handler` or `ScheduledExecutorService` inside Foreground Service
+* Ensure thread safety
+* Log key events for debugging
+
+---
+
+## **Edge Case Handling**
+
+* Missing GPX file
+* Invalid GPX format
+* Empty coordinate list
+* Permissions denied
+* Service already running
+
+---
+
+## **Project Setup**
+
+* Use **latest stable Gradle version supported by GitHub Actions**
+* Include:
+
+  * `gradlew`
+  * `gradlew.bat`
+  * `gradle-wrapper.properties`
+  * `gradle.properties`
+* Project must build with:
+
+  ```
+  ./gradlew build
+  ```
+
+---
+
+## **Output Requirements**
+
+Provide a **complete Android project**, including:
+
+* Java source code
+* XML layouts
+* AndroidManifest.xml
+* Gradle configuration files
+* No placeholders or pseudo code
+
+Ensure the app is:
+
+* Fully runnable
+* Cleanly structured
+* Ready to import into Android Studio
+
+---
+
+## **End of Prompt**
+
+---
