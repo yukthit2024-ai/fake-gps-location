@@ -30,29 +30,25 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import com.google.android.material.navigation.NavigationView;
 import com.vypeensoft.fakegps.model.LocationPoint;
 import com.vypeensoft.fakegps.service.MockLocationService;
-import com.vypeensoft.fakegps.utils.GpxParser;
+import android.os.Environment;
+import android.widget.ArrayAdapter;
+import android.widget.ImageButton;
+import android.widget.Spinner;
 
-import java.io.InputStream;
-import java.io.Serializable;
-import java.util.List;
+import java.io.File;
+import java.io.FileInputStream;
+import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
     private DrawerLayout drawer;
-    private TextView tvStatus, tvLat, tvLon, tvTime, tvFileInfo;
-    private Button btnStart, btnStop, btnLoad;
+    private TextView tvStatus, tvLat, tvLon, tvTime;
+    private Spinner spinnerGpx;
+    private ImageButton btnRefresh;
+    private Button btnStart, btnStop;
 
-    private List<LocationPoint> loadedPoints;
-    private String loadedFileName;
-
-    private final ActivityResultLauncher<String[]> filePickerLauncher = registerForActivityResult(
-            new ActivityResultContracts.OpenDocument(),
-            uri -> {
-                if (uri != null) {
-                    loadGpxFile(uri);
-                }
-            }
-    );
+    private List<File> gpxFiles = new ArrayList<>();
+    private final String TARGET_FOLDER = Environment.getExternalStorageDirectory() + "/Fake_GPS_Locations";
 
     private final BroadcastReceiver locationReceiver = new BroadcastReceiver() {
         @Override
@@ -89,18 +85,75 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         tvLat = findViewById(R.id.tv_lat);
         tvLon = findViewById(R.id.tv_lon);
         tvTime = findViewById(R.id.tv_time);
-        tvFileInfo = findViewById(R.id.tv_file_info);
 
+        spinnerGpx = findViewById(R.id.spinner_gpx);
+        btnRefresh = findViewById(R.id.btn_refresh);
         btnStart = findViewById(R.id.btn_start);
         btnStop = findViewById(R.id.btn_stop);
-        btnLoad = findViewById(R.id.btn_load);
 
-        btnLoad.setOnClickListener(v -> filePickerLauncher.launch(new String[]{"*/*"}));
+        btnRefresh.setOnClickListener(v -> scanGpxFolder());
         btnStart.setOnClickListener(v -> startSimulation());
         btnStop.setOnClickListener(v -> stopSimulation());
 
         checkPermissions();
+        scanGpxFolder();
         checkMockLocationEnabled();
+    }
+
+    private void scanGpxFolder() {
+        if (!checkStoragePermission()) return;
+
+        File folder = new File(TARGET_FOLDER);
+        if (!folder.exists()) {
+            if (folder.mkdirs()) {
+                Toast.makeText(this, "Created folder: " + TARGET_FOLDER, Toast.LENGTH_SHORT).show();
+            }
+        }
+
+        File[] files = folder.listFiles((dir, name) -> name.toLowerCase().endsWith(".gpx"));
+        gpxFiles.clear();
+        List<String> fileNames = new ArrayList<>();
+
+        if (files != null) {
+            for (File f : files) {
+                gpxFiles.add(f);
+                fileNames.add(f.getName());
+            }
+        }
+
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, 
+                android.R.layout.simple_spinner_item, fileNames);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinnerGpx.setAdapter(adapter);
+
+        if (fileNames.isEmpty()) {
+            Toast.makeText(this, "No GPX files found in " + TARGET_FOLDER, Toast.LENGTH_LONG).show();
+        }
+    }
+
+    private boolean checkStoragePermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            if (!Environment.isExternalStorageManager()) {
+                Toast.makeText(this, "All Files Access required to scan folder", Toast.LENGTH_LONG).show();
+                try {
+                    Intent intent = new Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION);
+                    intent.setData(Uri.parse("package:" + getPackageName()));
+                    startActivity(intent);
+                } catch (Exception e) {
+                    Intent intent = new Intent(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION);
+                    startActivity(intent);
+                }
+                return false;
+            }
+        } else {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
+                    != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(this,
+                        new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, 103);
+                return false;
+            }
+        }
+        return true;
     }
 
     private void checkMockLocationEnabled() {
@@ -143,21 +196,19 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
     }
 
-    private void loadGpxFile(Uri uri) {
-        try {
-            InputStream inputStream = getContentResolver().openInputStream(uri);
-            loadedPoints = GpxParser.parse(inputStream);
-            loadedFileName = uri.getLastPathSegment();
-            tvFileInfo.setText("Loaded: " + loadedFileName + " (" + loadedPoints.size() + " points)");
-            Toast.makeText(this, "GPX Loaded successfully", Toast.LENGTH_SHORT).show();
-        } catch (Exception e) {
-            Toast.makeText(this, "Error parsing GPX: " + e.getMessage(), Toast.LENGTH_LONG).show();
-        }
-    }
-
     private void startSimulation() {
-        if (loadedPoints == null || loadedPoints.isEmpty()) {
-            Toast.makeText(this, "Please load a GPX file first", Toast.LENGTH_SHORT).show();
+        int selectedIndex = spinnerGpx.getSelectedItemPosition();
+        if (selectedIndex < 0 || gpxFiles.isEmpty()) {
+            Toast.makeText(this, "Please select a GPX file", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        File selectedFile = gpxFiles.get(selectedIndex);
+        List<LocationPoint> points;
+        try {
+            points = GpxParser.parse(new FileInputStream(selectedFile));
+        } catch (Exception e) {
+            Toast.makeText(this, "Error reading file: " + e.getMessage(), Toast.LENGTH_LONG).show();
             return;
         }
 
@@ -165,7 +216,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         Intent intent = new Intent(this, MockLocationService.class);
         intent.setAction(MockLocationService.ACTION_START);
-        intent.putExtra(MockLocationService.EXTRA_POINTS, (Serializable) loadedPoints);
+        intent.putExtra(MockLocationService.EXTRA_POINTS, (Serializable) points);
         intent.putExtra(MockLocationService.EXTRA_INTERVAL, interval);
         
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -190,7 +241,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 ContextCompat.getColor(this, android.R.color.holo_red_dark));
         btnStart.setEnabled(!running);
         btnStop.setEnabled(running);
-        btnLoad.setEnabled(!running);
+        spinnerGpx.setEnabled(!running);
+        btnRefresh.setEnabled(!running);
     }
 
     @Override

@@ -18,8 +18,12 @@ Give me as a single prompt to give to an agent to achieve this
 
 -------------
 more prompts
-This app needs to be set as "Mock Location App" in the developer options
+*   This app needs to be set as "Mock Location App" in the developer options
 
+*	the GPX file which is loaded , should be picked from a folder like "/sdcard/Fake_GPS_Locations".  Inside this folder a list of GPX files are expected.
+	Load all of these files into a dropdown on the main screen.
+	The user then selects one GPX file from the dropdown, and then clicks start button.
+	The app then reads that GPX file and uses those locations as fake GPS at configured intervals
 
 
 
