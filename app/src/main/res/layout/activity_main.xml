@@ -69,24 +69,16 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Latitude: --"
-                            android:textSize="16sp" />
+                            android:textSize="13sp" />
 
                         <TextView
                             android:id="@+id/tv_lon"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Longitude: --"
-                            android:textSize="16sp"
+                            android:textSize="13sp"
                             android:layout_marginTop="4dp" />
 
-                        <TextView
-                            android:id="@+id/tv_time"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Timestamp: --"
-                            android:textSize="14sp"
-                            android:textColor="#666666"
-                            android:layout_marginTop="8dp" />
 
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>

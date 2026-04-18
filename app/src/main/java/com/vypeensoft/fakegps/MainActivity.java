@@ -47,7 +47,7 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
     private DrawerLayout drawer;
-    private TextView tvStatus, tvLat, tvLon, tvTime;
+    private TextView tvStatus, tvLat, tvLon;
     private Spinner spinnerGpx;
     private ImageButton btnRefresh;
     private Button btnStart, btnStop;
@@ -60,11 +60,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         public void onReceive(Context context, Intent intent) {
             double lat = intent.getDoubleExtra(MockLocationService.EXTRA_LAT, 0);
             double lon = intent.getDoubleExtra(MockLocationService.EXTRA_LON, 0);
-            String time = intent.getStringExtra(MockLocationService.EXTRA_TIME);
-
             tvLat.setText(getString(R.string.lat_label, String.valueOf(lat)));
             tvLon.setText(getString(R.string.lon_label, String.valueOf(lon)));
-            tvTime.setText(getString(R.string.time_label, time != null ? time : "--"));
             updateUiState(true);
         }
     };
@@ -89,7 +86,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         tvStatus = findViewById(R.id.tv_status);
         tvLat = findViewById(R.id.tv_lat);
         tvLon = findViewById(R.id.tv_lon);
-        tvTime = findViewById(R.id.tv_time);
 
         spinnerGpx = findViewById(R.id.spinner_gpx);
         btnRefresh = findViewById(R.id.btn_refresh);
