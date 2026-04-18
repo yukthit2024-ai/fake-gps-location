@@ -1,0 +1,4 @@
+at https://magichour.ai/tools/ai-icon-generator
+
+draw me an app icon in PNG format, which shown a GPS location marker with a red F on middle of the icon.  The marker can be in Green Color
+
