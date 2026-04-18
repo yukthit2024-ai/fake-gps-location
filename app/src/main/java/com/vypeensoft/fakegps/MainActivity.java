@@ -164,13 +164,16 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private void checkMockLocationEnabled() {
         try {
             LocationManager lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-            lm.addTestProvider(LocationManager.GPS_PROVIDER, false, false, false, false, false, false, false, 0, 5);
-            lm.removeTestProvider(LocationManager.GPS_PROVIDER);
-            // If we get here, it means we ARE the mock location app
+            if (lm != null) {
+                lm.addTestProvider(LocationManager.GPS_PROVIDER, false, false, false, false, false, false, false, 0, 5);
+                lm.removeTestProvider(LocationManager.GPS_PROVIDER);
+            }
         } catch (SecurityException e) {
-            // Not the mock location app
             Toast.makeText(this, "Please set this app as 'Mock Location App' in Developer Options", Toast.LENGTH_LONG).show();
             showMockLocationWarning();
+        } catch (Exception e) {
+            // Log other errors but don't crash the app
+            e.printStackTrace();
         }
     }
 
@@ -253,7 +256,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     protected void onResume() {
         super.onResume();
-        registerReceiver(locationReceiver, new IntentFilter(MockLocationService.BROADCAST_UPDATE), Context.RECEIVER_EXPORTED);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            registerReceiver(locationReceiver, new IntentFilter(MockLocationService.BROADCAST_UPDATE), Context.RECEIVER_EXPORTED);
+        } else {
+            registerReceiver(locationReceiver, new IntentFilter(MockLocationService.BROADCAST_UPDATE));
+        }
     }
 
     @Override
