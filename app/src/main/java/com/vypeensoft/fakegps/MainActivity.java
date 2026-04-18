@@ -6,7 +6,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
-import android.net.Uri;
+import android.provider.Settings;
+import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.MenuItem;
@@ -99,6 +100,31 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         btnStop.setOnClickListener(v -> stopSimulation());
 
         checkPermissions();
+        checkMockLocationEnabled();
+    }
+
+    private void checkMockLocationEnabled() {
+        try {
+            LocationManager lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+            lm.addTestProvider(LocationManager.GPS_PROVIDER, false, false, false, false, false, false, false, 0, 5);
+            lm.removeTestProvider(LocationManager.GPS_PROVIDER);
+            // If we get here, it means we ARE the mock location app
+        } catch (SecurityException e) {
+            // Not the mock location app
+            Toast.makeText(this, "Please set this app as 'Mock Location App' in Developer Options", Toast.LENGTH_LONG).show();
+            showMockLocationWarning();
+        }
+    }
+
+    private void showMockLocationWarning() {
+        btnStart.setText("Setup Mock Location");
+        btnStart.setOnClickListener(v -> {
+            try {
+                startActivity(new Intent(Settings.ACTION_APPLICATION_DEVELOPMENT_SETTINGS));
+            } catch (Exception e) {
+                Toast.makeText(this, "Could not open Developer Options. Please open manually.", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     private void checkPermissions() {

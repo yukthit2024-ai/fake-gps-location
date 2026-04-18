@@ -16,6 +16,9 @@ include gradle properties and gradle wrapper dependencies in the project
 
 Give me as a single prompt to give to an agent to achieve this
 
+-------------
+more prompts
+This app needs to be set as "Mock Location App" in the developer options
 
 
 
@@ -23,7 +26,7 @@ Give me as a single prompt to give to an agent to achieve this
 
 
 
-
+==============================================================================================================
 
 Here’s a clean, single prompt you can give to an AI coding agent. It incorporates your new **Start/Stop controls** and keeps everything tightly specified so the agent won’t guess or cut corners.
 
