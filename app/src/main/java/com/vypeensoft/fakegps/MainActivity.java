@@ -123,8 +123,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
 
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this, 
-                android.R.layout.simple_spinner_item, fileNames);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                R.layout.spinner_item, fileNames);
+        adapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
         spinnerGpx.setAdapter(adapter);
 
         if (fileNames.isEmpty()) {
